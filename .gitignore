@@ -129,9 +129,13 @@ dmypy.json
 .pyre/
 
 
-# Node.js stuff
+# Node.js 
 node_modules
 build
 npm-debug.log
 .env
 .DS_Store
+.nyc_output
+
+#r2s 
+log
