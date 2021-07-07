@@ -1,11 +1,13 @@
 const spawn      = require('child_process').spawn
+const sck = require('./sockets.js');
+
 const logOutput = (name) => (data) => console.log(`[${name}] ${data}`)
 
 
-let runlocal = function(args) {
+let runlocal = function(cmd, args) {
 
     return new Promise((resolve, reject) => {
-            const process = spawn('python', args);
+            const process = spawn(cmd, args);
     
             const out = []
             process.stdout.on('data', (data) => { out.push(data.toString()); } );
@@ -30,12 +32,18 @@ let runlocal = function(args) {
         });
 }
 
+let runRemote = function(host, args) {
+    return sck.run(host,args)
+}
+
+
 //TODO: runelsewhere --> allow to execution of python scripts outside the R2S Server
 
 
 module.exports = {
 
-    run:runlocal
+    run: function(args) {return runlocal('python',args)},
+    runRemote: function(host,args,id) {return runRemote(host,args,id)},
 
 }
 

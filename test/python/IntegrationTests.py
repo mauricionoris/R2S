@@ -1,25 +1,42 @@
-import sys
+import argparse, sys, os
 import json
 import logging
 
-
-logging.basicConfig(filename = './source/R2S/log/R2S.log',
-                    encoding='utf-8',
-                    format='%(asctime)s - %(message)s', 
-                    datefmt='%d-%b-%y %H:%M:%S',
-                    level=logging.INFO)
+parser=argparse.ArgumentParser()
 
 
-if sys.argv[3] != "null":
-    logs = sys.argv[3].split(',')
-    for item in logs:
-        logging.info('%s %s', sys.argv[1], item)
+parser.add_argument('--log',     '-l', help="Register the interaction to the log")
+parser.add_argument('--r2sPid', '-id', help="The executing Id of R2S")
+parser.add_argument('--ret',     '-r', help="The determined script return (for tests only)")
+
+ret = json.loads('{ "r2sPid": 0, "return": 1000, "exitCode": 100}')
+
+
+def R2STestingModule(args):
 
 
 
-ret = json.loads('{ "r2sPid": 0}')
-ret["r2sPid"] = sys.argv[1]
-ret["return"] = int(sys.argv[2])
+    if args.r2sPid != None:
+        ret["r2sPid"] = args.r2sPid
 
-print(json.dumps(ret)) #puts a json on stout
-sys.exit(ret["return"]) #exit code of the script
+    if args.ret != None:
+        ret["return"] = int(args.ret)
+
+    if args.log != "" :
+        logging.basicConfig(filename = '/source/R2S/log/R2S.log',
+                        encoding='utf-8',
+                        format='%(asctime)s - %(message)s', 
+                        datefmt='%d-%b-%y %H:%M:%S',
+                        level=logging.INFO)
+
+        logging.info('%s %s', ret["r2sPid"], args.log)
+    
+    ret["exitCode"]=ret["return"]
+    return json.dumps(ret) #puts a json on stout
+    
+
+if __name__ == '__main__':
+    args = parser.parse_args()
+    #print(args)
+    print(R2STestingModule(args))
+    sys.exit(ret["return"]) #exit code of the script
