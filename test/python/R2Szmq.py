@@ -31,7 +31,11 @@ while True:
 
     try:
         ps = load_file_as_module('R2Szmq', message[0])
+        print(message)
+        
         psreturn = ps.R2STestingModule(create_arg_dict(message))
+        
+        
         socket.send(json.dumps(psreturn).encode('utf8'))
 
     except Exception as e:

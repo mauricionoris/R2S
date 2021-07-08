@@ -1,13 +1,24 @@
 const fs         = require('fs');
 const readline   = require('readline');
-const logfile = './source/R2S/log/R2S.log'
+//const { Readable } = require('stream');
 
 
-let logreader = function readLog(r2sPid){
+/* let readlog = function(file) {
+
+    const fsp = fs.promises;
+    return async () => {
+        const data = fs.readFile(file, "binary");
+        return Buffer.from(data);
+    }
+
+} */
+
+
+let logreader = function readLog(file, r2sPid){
         return new Promise((resolve, reject) => {
         let logLines = []
         let rl = readline.createInterface({
-            input: fs.createReadStream(logfile),
+            input:  fs.createReadStream(file),
             output: process.stdout,
             terminal: false
         });

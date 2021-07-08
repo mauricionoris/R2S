@@ -14,7 +14,8 @@ const uuidV4     = require("uuid/v4");
 let Options = {
   "r2sPid": uuidV4(),
   "ret": 0,
-  "log": ""
+  "log": "",
+  "logfile": "/source/R2S/log/R2SS.log"
 }
 
 function DictToParams(opt) {
@@ -55,8 +56,7 @@ describe('environment/recommender tests', function() {
     describe('Calling an Arrow Script', function() {
       let args2 = ['/source/R2S/test/python/ArrowTest.py']
       xit('should be able to use Arrow on R2SData', async () => {
-        const host = 'vagrant@R2S-Data'
-        python.runRemote(host, args2.concat(DictToParams(Options))).then((ret) =>{
+          python.runRemote(host, args2.concat(DictToParams(Options))).then((ret) =>{
           assert.strictEqual(ret['r2sPid'], "44847988-b26c-475c-9b38-c41f93f6994a")
 
         })
@@ -64,8 +64,6 @@ describe('environment/recommender tests', function() {
       
       })
     })
-
-
   })  
 
   describe('Checking the script output', function() {
@@ -96,23 +94,25 @@ describe('environment/recommender tests', function() {
   });
 
 
-
   describe('Viewing script log', function() {
       let logmessage = 'test'
 
       it('should be able to monitor the log of a specific r2sPid', async () => {
         Options.log = logmessage
         ret = await python.run(args.concat(DictToParams(Options)))
-        let logRead = await logHandler.readbyr2sPid(Options.r2sPid)
+        let logRead = await logHandler.readbyr2sPid(Options.logfile,Options.r2sPid)
         assert.deepStrictEqual([logmessage], logRead)
       })
 
-      xit('should be able to monitor the log of a specific r2sPid -- Remotelly', async () => {
+      it('should be able to monitor the log of a specific r2sPid -- Remotelly', async () => {
         Options.r2sPid = uuidV4()
         Options.log = logmessage
+        Options.logfile =  "/source/R2S/log/R2SD.log"
         ret = await python.runRemote(host, args.concat(DictToParams(Options)),Options.r2sPid)
-        let logRead = await logHandler.readbyr2sPid(Options.r2sPid)
+        let logRead = await logHandler.readbyr2sPid(Options.logfile,Options.r2sPid)
         assert.deepStrictEqual([logmessage], logRead)
+
+
       })
     });
 });

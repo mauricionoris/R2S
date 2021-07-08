@@ -6,6 +6,7 @@ parser=argparse.ArgumentParser()
 
 
 parser.add_argument('--log',     '-l', help="Register the interaction to the log")
+parser.add_argument('--logfile', '-lf', help="Path to the log file")
 parser.add_argument('--r2sPid', '-id', help="The executing Id of R2S")
 parser.add_argument('--ret',     '-r', help="The determined script return (for tests only)")
 
@@ -23,7 +24,7 @@ def R2STestingModule(args):
         ret["return"] = int(args.ret)
 
     if args.log != "" :
-        logging.basicConfig(filename = '/source/R2S/log/R2S.log',
+        logging.basicConfig(filename = args.logfile,
                         encoding='utf-8',
                         format='%(asctime)s - %(message)s', 
                         datefmt='%d-%b-%y %H:%M:%S',
