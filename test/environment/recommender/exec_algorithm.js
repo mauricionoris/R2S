@@ -4,6 +4,8 @@ const R2SPath = '../../..'
 const host = "tcp://10.0.0.11:5555"
 
 const logHandler = require(R2SPath + '/src/util/logHandler.js');
+const fileHandler = require(R2SPath + '/src/util/fileHandler.js');
+
 const python     = require(R2SPath + '/src/util/pythonBridge.js');
 
 const assert     = require('assert');
@@ -15,8 +17,12 @@ let Options = {
   "r2sPid": uuidV4(),
   "ret": 0,
   "log": "",
-  "logfile": "/source/R2S/log/R2SS.log"
+  "logfile": "/source/R2S/log/R2SS.log",
+  "function": ""
 }
+
+
+
 
 function DictToParams(opt) {
 
@@ -33,7 +39,7 @@ function DictToParams(opt) {
 }
 
 
-describe('environment/recommender tests', function() {
+describe('structural tests', function() {
   let args = ['/source/R2S/test/python/IntegrationTests.py']
 
   describe('Executing a python Script', function() {
@@ -53,17 +59,7 @@ describe('environment/recommender tests', function() {
       }) 
     })
 
-    describe('Calling an Arrow Script', function() {
-      let args2 = ['/source/R2S/test/python/ArrowTest.py']
-      xit('should be able to use Arrow on R2SData', async () => {
-          python.runRemote(host, args2.concat(DictToParams(Options))).then((ret) =>{
-          assert.strictEqual(ret['r2sPid'], "44847988-b26c-475c-9b38-c41f93f6994a")
 
-        })
-        //console.log(ret)
-      
-      })
-    })
   })  
 
   describe('Checking the script output', function() {
@@ -114,5 +110,44 @@ describe('environment/recommender tests', function() {
 
 
       })
-    });
+  });
+
+
+
+
+  describe('Handling files and folders', function(){
+
+    xit("Should be able to create a new folder")
+
+    xit("Should be able to rename a existing folder and create a new one with the same name")
+
+    xit("Should be able to list all files of a specific extension")
+
+    xit("Should be able to get the size of a file")
+
+
+  })
+
+
+  describe('Calling an Arrow Script', function() {
+      
+      it('should be able to use Arrow on R2SData', async () => {
+        Options.function = "ArrowTesting"  
+        Options.ret = ""
+        ret = await python.runRemote(host, args.concat(DictToParams(Options)),Options.r2sPid)
+        assert.strictEqual(ret['tCompare'], true)
+      })
+
+      xit('should be able to read a CSV file to a Arrow Table')
+
+      xit('should be able to read a Parquet file')
+
+      xit('should be able to write a Parquet file')
+      
+
+  })
+
+
+
+
 });
