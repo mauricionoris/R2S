@@ -4,8 +4,7 @@ const R2SPath = '../../..'
 const host = "tcp://10.0.0.11:5555"
 
 const logHandler = require(R2SPath + '/src/util/logHandler.js');
-const fileHandler = require(R2SPath + '/src/util/fileHandler.js');
-
+//const fileHandler = require(R2SPath + '/src/util/fileHandler.js');
 const python     = require(R2SPath + '/src/util/pythonBridge.js');
 
 const assert     = require('assert');
@@ -21,8 +20,15 @@ let Options = {
   "function": ""
 }
 
-
-
+let Options2 = {
+  "r2sPid": uuidV4(),
+  "ret": 0,
+  "folder_path": "/source/R2S/data/R2SDatasets/test",
+  "file_path": "",
+  "extension":"csv",
+  "function": "",
+  "log": ""
+}
 
 function DictToParams(opt) {
 
@@ -89,7 +95,6 @@ describe('structural tests', function() {
     })
   });
 
-
   describe('Viewing script log', function() {
       let logmessage = 'test'
 
@@ -113,24 +118,52 @@ describe('structural tests', function() {
   });
 
 
-
-
   describe('Handling files and folders', function(){
-
-    xit("Should be able to create a new folder")
-
-    xit("Should be able to rename a existing folder and create a new one with the same name")
-
-    xit("Should be able to list all files of a specific extension")
-
-    xit("Should be able to get the size of a file")
-
-
-  })
-
-
-  describe('Calling an Arrow Script', function() {
+    let args2 = ['/source/R2S/src/util/fileHandler.py']
+    it("Should be able to create a new folder", async () => {
+      Options2.function = "create_folder"
+      ret = await python.run(args2.concat(DictToParams(Options2)))
+      assert.strictEqual(ret['r2sPid'], Options2.r2sPid)
       
+    })
+
+    it("Should be able to create a new folder - Remotelly", async () => {
+      Options2.function = "create_folder"
+      ret = await python.runRemote(host, args2.concat(DictToParams(Options2)))
+      assert.strictEqual(ret['r2sPid'], Options2.r2sPid)
+      
+    })
+    
+    it("Should be able to list all files of a specific extension", async () => {
+      Options2.function = "read_folder"
+      Options2.folder_path = "/source/R2S/data/R2SDatasets/test2"
+      ret = await python.run(args2.concat(DictToParams(Options2)))
+      assert.deepStrictEqual(ret['files'], ['arq1.csv','arq2.csv'])
+      
+    })
+    it("Should be able to list all files of a specific extension - Remotelly", async () => {
+      Options2.function = "read_folder"
+      Options2.folder_path = "/source/R2S/data/R2SDatasets/test2"
+      ret = await python.runRemote(host,args2.concat(DictToParams(Options2)))
+      assert.deepStrictEqual(ret['files'], ['arq1.csv','arq2.csv'])
+      
+    })
+
+    it("Should be able to get the size of a file", async () => {
+      Options2.function = "file_size"
+      Options2.file_path = "/source/R2S/data/R2SDatasets/test2/arq2.csv"
+      ret = await python.run(args2.concat(DictToParams(Options2)))
+      expect(ret['file_size']).to.be.greaterThan(0)
+    })
+    it("Should be able to get the size of a file - Remotelly", async () => {
+      Options2.function = "file_size"
+      Options2.file_path = "/source/R2S/data/R2SDatasets/test2/arq2.csv"
+      ret = await python.runRemote(host,args2.concat(DictToParams(Options2)))
+      expect(ret['file_size']).to.be.greaterThan(0)
+    })
+  })
+  describe('Calling an Arrow Script', function() {
+      this.timeout(5000)
       it('should be able to use Arrow on R2SData', async () => {
         Options.function = "ArrowTesting"  
         Options.ret = ""

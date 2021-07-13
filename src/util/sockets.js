@@ -16,7 +16,6 @@ async function runbysockets(host, msg, id) {
       received = JSON.parse(decoder.write(res))
       if (id === received['r2sPid']) {
         return JSON.parse(received)
-        break;
       }
     } 
   }

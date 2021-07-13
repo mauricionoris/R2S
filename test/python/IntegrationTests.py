@@ -15,7 +15,6 @@ parser.add_argument('--function',  '-f', help="The function which should be call
 ret = json.loads('{"r2sPid": 0, "return": 1000, "exitCode": 100}')
 
 
-
 def R2Sselector(func, args):
     if func == 'ArrowTesting':
         from arrowTest import arrowTest
@@ -23,11 +22,11 @@ def R2Sselector(func, args):
     if func == 'b':
         return 2
 
-def R2STestingModule(args):
+def R2SProxyModule(args):
 
     if args.function != "":
         ret.update(R2Sselector(args.function, args))
-        
+
     if args.r2sPid != None:
         ret["r2sPid"] = args.r2sPid
 
@@ -53,5 +52,5 @@ def R2STestingModule(args):
 if __name__ == '__main__':
     args = parser.parse_args()
     #print(args)
-    print(R2STestingModule(args))
+    print(R2SProxyModule(args))
     sys.exit(ret["return"]) #exit code of the script

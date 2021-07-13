@@ -37,9 +37,6 @@ let runRemote = function(host, args) {
 }
 
 
-//TODO: runelsewhere --> allow to execution of python scripts outside the R2S Server
-
-
 module.exports = {
 
     run: function(args) {return runlocal('python',args)},

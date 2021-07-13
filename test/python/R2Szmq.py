@@ -33,7 +33,7 @@ while True:
         ps = load_file_as_module('R2Szmq', message[0])
         print(message)
         
-        psreturn = ps.R2STestingModule(create_arg_dict(message))
+        psreturn = ps.R2SProxyModule(create_arg_dict(message))
         
         
         socket.send(json.dumps(psreturn).encode('utf8'))
