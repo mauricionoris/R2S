@@ -4,7 +4,6 @@ const R2SPath = '../../..'
 const host = "tcp://10.0.0.11:5555"
 
 const logHandler = require(R2SPath + '/src/util/logHandler.js');
-//const fileHandler = require(R2SPath + '/src/util/fileHandler.js');
 const python     = require(R2SPath + '/src/util/pythonBridge.js');
 
 const assert     = require('assert');
@@ -59,6 +58,7 @@ describe('structural tests', function() {
     })
 
     describe('Calling the script remotelly', function() {
+      this.timeout(6000)
        it('should call a python script and return the r2sPid', async () => {
         ret = await python.runRemote(host, args.concat(DictToParams(Options)),Options.r2sPid)
         assert.strictEqual(ret['r2sPid'], Options.r2sPid)
@@ -117,9 +117,9 @@ describe('structural tests', function() {
       })
   });
 
-
   describe('Handling files and folders', function(){
-    let args2 = ['/source/R2S/src/util/fileHandler.py']
+    //let args2 = ['/source/R2S/src/util/fileHandler.py']
+    let args2 = ['/source/R2S/test/python/IntegrationTests.py']
     it("Should be able to create a new folder", async () => {
       Options2.function = "create_folder"
       ret = await python.run(args2.concat(DictToParams(Options2)))
@@ -170,13 +170,7 @@ describe('structural tests', function() {
         ret = await python.runRemote(host, args.concat(DictToParams(Options)),Options.r2sPid)
         assert.strictEqual(ret['tCompare'], true)
       })
-
-      xit('should be able to read a CSV file to a Arrow Table')
-
-      xit('should be able to read a Parquet file')
-
-      xit('should be able to write a Parquet file')
-      
+    
 
   })
 
@@ -184,3 +178,38 @@ describe('structural tests', function() {
 
 
 });
+
+
+
+describe('functional tests', function() {
+
+  let args = ['/source/R2S/src/util/R2S.py']
+
+  let OptionsFunctional = {
+    "r2sPid": uuidV4(),
+    "ret": 0,
+    "log": "",
+    "logfile": "",
+    "function": "import_dataset",
+    "extension": "csv",
+    "folderIn": "/source/datasets/movielens/ml-25m",
+    "folderOut":"/source/R2S/data/R2SDatasets/movielens"
+  }
+
+  describe('Setup of a new domain', function() {
+    this.timeout(10000)
+    describe('Importing a dataset', function() {
+      it('should be able to convert a dataset to parquet and import it into R2S datasets', async () => {
+        ret = await python.runRemote(host,args.concat(DictToParams(OptionsFunctional)))
+        assert.strictEqual(ret['r2sPid'], OptionsFunctional.r2sPid)
+      
+      })
+    })
+
+
+
+  })  
+
+
+  
+})

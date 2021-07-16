@@ -28,15 +28,15 @@ socket.bind("tcp://10.0.0.11:5555")
 while True:
     #  Wait for next request from client
     message = socket.recv().decode('utf-8').split(',')
-
+   
     try:
-        ps = load_file_as_module('R2Szmq', message[0])
+        R2S = load_file_as_module('R2Szmq', message[0])
         print(message)
         
-        psreturn = ps.R2SProxyModule(create_arg_dict(message))
+        R2Sreturn = R2S.R2SProxyModule(create_arg_dict(message))
         
         
-        socket.send(json.dumps(psreturn).encode('utf8'))
+        socket.send(json.dumps(R2Sreturn).encode('utf8'))
 
     except Exception as e:
         print(e)
