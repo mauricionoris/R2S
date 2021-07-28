@@ -1,0 +1,17 @@
+{
+    "state": 
+        {
+              "user":""
+            , "item":""
+            , "environment":
+            [
+                {
+                   "algorithm": ""
+                , "parameters": ""
+                , "attributes": ""
+                , "similarity": ""
+                , "ranking"   : ""
+                }
+            ]
+        }
+}

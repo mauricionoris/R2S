@@ -163,7 +163,7 @@ describe('structural tests', function() {
     })
   })
   describe('Calling an Arrow Script', function() {
-      this.timeout(5000)
+      this.timeout(10000)
       it('should be able to use Arrow on R2SData', async () => {
         Options.function = "ArrowTesting"  
         Options.ret = ""
@@ -197,7 +197,7 @@ describe('functional tests', function() {
   }
 
   describe('Setup of a new domain', function() {
-    this.timeout(10000)
+    this.timeout(20000)
     describe('Importing a dataset', function() {
       it('should be able to convert a dataset to parquet and import it into R2S datasets', async () => {
         ret = await python.runRemote(host,args.concat(DictToParams(OptionsFunctional)))
