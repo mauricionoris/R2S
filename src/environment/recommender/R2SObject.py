@@ -11,7 +11,7 @@
 """
 Code to import commonly-used RecSys data sets into LensKit-compatible data frames.
 """
-
+import pickle
 import logging
 import importlib
 import sys 
@@ -80,15 +80,21 @@ class R2S:
     def __del__(self):
         print('----------------------------ending the scope of the R2S framework---------------------------')
 
-        #udt = pa.map_(pa.int(), pa.array())
-        #schema = pa.schema([pa.field('id',udt), pa.field('rec', pa.array)])
-        #test = pd.DataFrame.from_dict(self.algo.Random.rec)
-        test = pa.DictionaryArray.from_arrays(self.algo.Random.rec.keys(),self.algo.Random.rec.values())
+       
 
-        
+        # Store data (serialize)
+        with open('/source/R2S/cache/random.rec.pickle', 'wb') as handle:
+            pickle.dump(self.algo.Random.rec, handle, protocol=pickle.HIGHEST_PROTOCOL)
+
+
+#        with open('/source/R2S/cache/user.candidates.pickle', 'wb') as handle:
+#            pickle.dump(self.algo.Random.candidates, handle, protocol=pickle.HIGHEST_PROTOCOL)
+
+        #TODO: Candidates generates a huge cache (PROBLEM) ...but it can be used in different algos
+
+        print('----------------------------recomendation caches updated---------------------------')
         
         #TODO: SAVING THE RECOMMENDATIONS AND CANDIDATES AS CACHE TO IMPROVE THE ALGORITHMS
-        print(type(test))
 
 #    @cached_property
 #    def metadata():

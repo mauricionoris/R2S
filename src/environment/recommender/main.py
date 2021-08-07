@@ -6,6 +6,9 @@ from argparse import Namespace
 
 args = "dataset={'name':'MovieLens', 'path':'/source/R2S/data/R2SDatasets/movielens'}, data={'ratings':None, 'movies': None, 'tags': None, 'links': None, 'genome-tags':None, 'genome-scores': None}, algo={'PopScore': './algoritms/PopScore.py'}"
 
+import time                                                
+
+
 
 #print(args)
 R2S = R2SObject.R2S(dataset={'name':'MovieLens', 'path':'/source/R2S/data/R2SDatasets/movielens'}
@@ -16,28 +19,37 @@ R2S = R2SObject.R2S(dataset={'name':'MovieLens', 'path':'/source/R2S/data/R2SDat
 
 #print(R2S.__dict__)
 
-#print(R2S.__dict__)
-
-R2S.algo.PopScore.scores = R2S.data['ratings']['movieId'].value_counts()
-R2S.algo.PopScore.score_method = 'quantile'
-"""
-
-#print(len(R2S.algo.Random.items))
-R2S.algo.Random.fit()
-print(R2S.algo.Random.users)
-
-"""
+#R2S.algo.PopScore.scores = R2S.data['ratings']['movieId'].value_counts()
+#R2S.algo.PopScore.score_method = 'quantile'
 
 #print(R2S.algo.Random.items)
+#print(R2S.algo.PopScore.fit())
 
 
-print(R2S.algo.PopScore.fit())
+# setting Random algo
 R2S.algo.Random.ui_coo = R2S.ui_coo
 R2S.algo.Random.items = R2S.data['movies']['movieId'].to_numpy()
 
-arr = np.arange(100)
-print(arr)
-R2S.algo.Random.recommend(arr.tolist())
-#R2S.algo.Random.recommend()
+arr = np.arange(1000)
+n = 10
+clean_cache = True
 
-print(R2S.algo.Random.rec)
+#@timeit
+#def evaluateTime(arr, n, cache):
+#    R2S.algo.Random.recommend(user = arr, n=n, clean_cache=cache)
+
+
+#evaluateTime(arr,n,True)
+ts = time.time()
+R2S.algo.Random.recommend(user = arr, n=n, clean_cache=clean_cache)
+te = time.time()
+
+#for i in arr:
+#    print('User {} --> Recommendations {}'.format(i,R2S.algo.Random.rec[i][0:n]))
+
+
+
+print ('Time elapsed {} to run ({}) with the folling parameters {}'.format(te-ts,'Random',{'arr':len(arr), 'n': n, 'cache':clean_cache}) )
+
+
+
