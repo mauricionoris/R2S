@@ -140,3 +140,5 @@ npm-debug.log
 #r2s 
 log
 data/R2SDatasets
+cache
+*.ipynb
