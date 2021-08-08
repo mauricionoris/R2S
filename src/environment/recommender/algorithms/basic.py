@@ -18,7 +18,7 @@ import os.path
 
 class PopScore():
     
-    def __init__(self, **kwargs):
+    def __init__(self, parent):
 
         #self.scores = ratings['item'].value_counts()
         self.scores = None 
@@ -52,7 +52,7 @@ class PopScore():
 class Random():
 
 
-    def __init__(self):
+    def __init__(self, parent):
         
 
         
@@ -62,9 +62,12 @@ class Random():
         candidates = {}
 
         if os.path.isfile(recfile) == True:
-            # Load data (deserialize)
-            with open(recfile, 'rb') as handle:
-                cached_data = pickle.load(handle)
+            try:
+                # Load data (deserialize)
+                with open(recfile, 'rb') as handle:
+                    cached_data = pickle.load(handle)
+            except:
+                cached_data = {}
 
         #if os.path.isfile(candidatesfile) == True:
         #    # Load data (deserialize)
@@ -72,7 +75,7 @@ class Random():
         #        candidates = pickle.load(handle)
 
 
-        self.ui_coo = None
+        self.ui_coo = parent['ui_coo']
         self.items = None
         self.rec = cached_data
         #self.candidates = candidates
@@ -96,8 +99,8 @@ class Random():
         for i ,rated in zip(user, self.lil.rows[tuple([user])]):
             #print('generating new recommendations for user: {} '.format(i))
             #self.rec[i] = rng.choice(self.candidates[i], n, True).tolist()
-            self.rec[i] = rng.choice(np.setdiff1d(self.items, rated, True), n, True)
-            
+            candidates = np.setdiff1d(self.items, rated, True)
+            self.rec[i] = rng.choice(candidates, min(len(candidates),n), False)           
 
 
 

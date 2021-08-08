@@ -49,18 +49,15 @@ class R2S:
         
         self.dataset = Namespace(**self.dataset)
         
-        #load algorithms available for that dataset
-        for k in self.algo:
-            print ('Loading the algorithm {} from the module {}'.format(k,self.algo[k]))
-            self.algo[k] = getattr(importlib.import_module(self.algo[k],k),k)()
-           
-        self.algo = Namespace(**self.algo)
+
 
         #load all dataset
         for k in self.data:
             fn = str(self.dataset.path) + '/' + k + '.parquet'
             self.data[k] = pq.read_table(source=fn).to_pandas()
             print('Loading data file {} with {} rows and  {} columns'.format(k, self.data[k].shape[0],self.data[k].shape[1]))
+
+        #self.data = Namespace(**self.data)
 
 
         self.matrix = Namespace(**self.matrix)
@@ -74,11 +71,18 @@ class R2S:
         self.ui_coo = spa.coo_matrix((_data, (_row, _col)))
 
 
-        #self.data = Namespace(**self.data)
+        #load algorithms available for that dataset
+        for k in self.algo:
+            print ('Loading the algorithm {} from the module {}'.format(k,self.algo[k]))
+            self.algo[k] = getattr(importlib.import_module(self.algo[k],k),k)(self.__dict__)
+           
+        self.algo = Namespace(**self.algo)
+
 
 
     def __del__(self):
-        print('----------------------------ending the scope of the R2S framework---------------------------')
+        print('----------------------------R2S Object end of scope -------------------------------------')
+        print('----------------------------Thanks for using R2S ----------------------------------------')
 
        
 
@@ -92,7 +96,8 @@ class R2S:
 
         #TODO: Candidates generates a huge cache (PROBLEM) ...but it can be used in different algos
 
-        print('----------------------------recomendation caches updated---------------------------')
+        print('----------------------------Cache files updated -----------------------------------------')
+
         
         #TODO: SAVING THE RECOMMENDATIONS AND CANDIDATES AS CACHE TO IMPROVE THE ALGORITHMS
 
