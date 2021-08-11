@@ -1,0 +1,60 @@
+import os
+import pickle
+import hashlib
+
+
+cache_path = '/source/R2S/cache/'
+cachemap_path = '/source/R2S/cache/cachemap.pickle'
+
+def _get_args_dict(fn, args, kwargs):
+    args_names = fn.__code__.co_varnames[:fn.__code__.co_argcount]
+    key =  {**dict(zip(args_names, args)), **kwargs}
+    key['self'] = str(type(key['self']))
+    if 'use_cache' in key:
+        if key['use_cache'] == False: ##if this is False the disables the cache 
+            key = {}
+    return key
+
+def cached():
+    """
+    A function that creates a decorator which will use "cachefile" for caching the results of the decorated function "fn".
+    """
+    def decorator(fn):  # define a decorator for a function "fn"
+        def wrapped(*args, **kwargs):   # define a wrapper that will finally call "fn" with all arguments            
+            # if cache exists -> load it and return its content
+            
+            key = _get_args_dict(fn, args, kwargs)           
+            if key == {}:
+                return fn(*args, **kwargs)
+            
+            hashkey = hashlib.sha1(str(key).encode("utf-8")).hexdigest()
+            cachemap = {}
+            if os.path.exists(cachemap_path):
+                with open(cachemap_path, 'rb') as cachehandle:
+                    cachemap =  pickle.load(cachehandle)
+   
+                if hashkey in cachemap:
+                    if os.path.exists(cachemap[hashkey]):
+                            with open(cachemap[hashkey], 'rb') as cachehandle:
+                                print("using cached result from '%s'" % cachemap[hashkey])
+                                return pickle.load(cachehandle)
+
+            # execute the function with all arguments passed
+            res = fn(*args, **kwargs)
+        
+            cachemap[hashkey] = cache_path + hashkey + '.pickle'
+
+            # write to cache file
+            with open(cachemap[hashkey], 'wb') as cachehandle:
+                print("saving result to cache '%s'" % cachemap[hashkey])
+                pickle.dump(res, cachehandle)
+
+            # update cache map
+            with open(cachemap_path, 'wb') as cachehandle:
+                pickle.dump(cachemap, cachehandle)
+
+            return res
+
+        return wrapped
+
+    return decorator   # return this "customized" decorator that uses "cachefile"

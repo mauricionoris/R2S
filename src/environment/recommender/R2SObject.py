@@ -25,6 +25,7 @@ import scipy.sparse as spa
 
 sys.path.append('/source/R2S/src/environment/recommender/algorithms')
 
+
 log = logging.getLogger(__name__)
 
 
@@ -87,8 +88,8 @@ class R2S:
        
 
         # Store data (serialize)
-        with open('/source/R2S/cache/random.rec.pickle', 'wb') as handle:
-            pickle.dump(self.algo.Random.rec, handle, protocol=pickle.HIGHEST_PROTOCOL)
+###        with open('/source/R2S/cache/random.rec.pickle', 'wb') as handle:
+###            pickle.dump(self.algo.Random.rec, handle, protocol=pickle.HIGHEST_PROTOCOL)
 
 
 #        with open('/source/R2S/cache/user.candidates.pickle', 'wb') as handle:

@@ -14,12 +14,20 @@ import numpy as np
 import scipy.sparse as spa
 import pickle
 import os.path
+import sys
+
+sys.path.append('/source/R2S/src/util')
+
+from cache import cached
+from R2Sprofile import profileit
 
 
 class PopScore():
     
     def __init__(self, parent):
 
+
+        #get_class_from_frame(inspect.stack()[1][0])
         #self.scores = ratings['item'].value_counts()
         self.scores = None 
         self.score_method = None 
@@ -51,60 +59,28 @@ class PopScore():
 
 class Random():
 
-
+    #recfile = '/source/R2S/cache/random.rec.pickle'
     def __init__(self, parent):
         
-
-        
-        recfile = '/source/R2S/cache/random.rec.pickle'
-        #candidatesfile = '/source/R2S/cache/user.candidates.pickle'
-        cached_data = {}
-        candidates = {}
-
-        if os.path.isfile(recfile) == True:
-            try:
-                # Load data (deserialize)
-                with open(recfile, 'rb') as handle:
-                    cached_data = pickle.load(handle)
-            except:
-                cached_data = {}
-
-        #if os.path.isfile(candidatesfile) == True:
-        #    # Load data (deserialize)
-        #    with open(candidatesfile, 'rb') as handle:
-        #        candidates = pickle.load(handle)
-
-
         self.ui_coo = parent['ui_coo']
         self.items = None
-        self.rec = cached_data
-        #self.candidates = candidates
+        self.rec = None
 
-    #EVALUATE CANDIDATES CACHE GENERATION
-    #def getcandidates(self, user):
 
-    #    missingusers = np.setdiff1d(user, list(self.candidates.keys()), True)
-    #    for i ,rated in zip(user, self.lil.rows[tuple([missingusers])]):
-    #        self.candidates[i] = np.setdiff1d(self.items, rated, True)
-        
-    #    return True
-
-    
-    def fit(self, user, n):
+    @cached()
+    def fit(self, user, n, use_cache=False):
         
         self.lil = self.ui_coo.tolil()
         rng = np.random.default_rng(1)
-
-        #self.getcandidates(user)
+        rec = {}
         for i ,rated in zip(user, self.lil.rows[tuple([user])]):
-            #print('generating new recommendations for user: {} '.format(i))
-            #self.rec[i] = rng.choice(self.candidates[i], n, True).tolist()
             candidates = np.setdiff1d(self.items, rated, True)
-            self.rec[i] = rng.choice(candidates, min(len(candidates),n), False)           
+            rec[i] = rng.choice(candidates, n, False)           
 
+        return rec
 
-
-    def recommend(self, user=None, n=10, clean_cache=False):
+    @profileit
+    def recommend(self, user=None, n=10, use_cache=False):
         
         if user is None:
             user = np.unique(self.ui_coo.row)
@@ -112,37 +88,37 @@ class Random():
             if len(user) == 0:
                 user = np.unique(self.ui_coo.row)
 
-
-        if clean_cache == True:
-            print('Cleaning {} users cached'.format(len(self.rec.keys())))
-            self.rec = {}
-        else:
-            user = np.setdiff1d(user, list(self.rec.keys()), True)
-            print('Users from cache {}'.format(len(self.rec.keys())))
-
-
-
-        print('New users {}'.format(len(user)))
-
-
-        self.fit(user, n)
-        
-
+        self.rec = self.fit(user, n, use_cache)
 
         return self.rec
-
-
-
-
-
-
-
-
-
-
 
 
     def __str__(self):
         return 'Random'
 
 
+""" TODO: avoid these classes from being instantiated outside the R2S scope
+import inspect
+
+def get_class_from_frame(fr):
+  args, _, _, value_dict = inspect.getargvalues(fr)
+  # we check the first parameter for the frame function is
+  # named 'self'
+  if len(args) and args[0] == 'self':
+    # in that case, 'self' will be referenced in value_dict
+    instance = value_dict.get('self', None)
+    if instance:
+      # return its class
+      caller = getattr(instance, '__class__', None)
+      print(type(caller))
+      if  caller != '''<class 'R2SObject.R2S'>''':
+          print('here')
+          raise ValueError('This class cannot be instantiated by {}'.format(caller))
+          raise SystemExit
+          sys.exit()
+
+      return getattr(instance, '__class__', None)
+  # return None otherwise
+  return None
+
+"""
