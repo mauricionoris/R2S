@@ -1,4 +1,4 @@
-import os, secrets
+import os, secrets, pickle
 
 def convert_bytes(num):
     """
@@ -42,5 +42,17 @@ def read_folder(folder_path, extension):
     return  files
 
 
+def read_pickle(file_path):
+    with open(file_path, 'rb') as cachehandle:
+        return pickle.load(cachehandle)
+
+
+def write_pickle(file_path): #TODO
+    files = []
+    for FILE in os.listdir(folder_path):
+        if FILE.endswith("." + extension):
+            files.append(FILE)
+    
+    return  files
 
 

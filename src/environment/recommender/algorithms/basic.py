@@ -16,6 +16,8 @@ import pickle
 import os.path
 import sys
 
+from datetime import datetime
+
 sys.path.append('/source/R2S/src/util')
 
 from cache import cached
@@ -68,27 +70,33 @@ class Random():
 
 
     @cached()
-    def fit(self, user, n, use_cache=False):
+    def fit(self, user, n, use_cache=False, metadata={}):
         
         self.lil = self.ui_coo.tolil()
         rng = np.random.default_rng(1)
         rec = {}
         for i ,rated in zip(user, self.lil.rows[tuple([user])]):
             candidates = np.setdiff1d(self.items, rated, True)
-            rec[i] = rng.choice(candidates, n, False)           
+            rec[str(i)] = rng.choice(candidates, n, False)   
 
         return rec
 
     @profileit
     def recommend(self, user=None, n=10, use_cache=False):
         
+
+        now = datetime.now()
+
+        timestamp = datetime.timestamp(now)
+        mymetadata = {'recommended_at':timestamp, 'by': 'me'}
+        mymetadata = {}
         if user is None:
             user = np.unique(self.ui_coo.row)
         else:
             if len(user) == 0:
                 user = np.unique(self.ui_coo.row)
 
-        self.rec = self.fit(user, n, use_cache)
+        self.rec = self.fit(user, n, use_cache, mymetadata)
 
         return self.rec
 

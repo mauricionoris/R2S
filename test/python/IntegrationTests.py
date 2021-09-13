@@ -11,7 +11,6 @@ def R2SProxyModule(args):
 
 if __name__ == '__main__':
     args = R2S.ParseParameters()
-    #print(args)
     ret = R2S.ProxyModule(args)
     print(json.dumps(ret))
     sys.exit(ret["return"]) #exit code of the script

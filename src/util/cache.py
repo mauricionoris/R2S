@@ -13,7 +13,9 @@ def _get_args_dict(fn, args, kwargs):
     if 'use_cache' in key:
         if key['use_cache'] == False: ##if this is False the disables the cache 
             key = {}
-    return key
+
+    metadata = key.pop('metadata', None)
+    return key, metadata
 
 def cached():
     """
@@ -23,7 +25,7 @@ def cached():
         def wrapped(*args, **kwargs):   # define a wrapper that will finally call "fn" with all arguments            
             # if cache exists -> load it and return its content
             
-            key = _get_args_dict(fn, args, kwargs)           
+            key, metadata = _get_args_dict(fn, args, kwargs)           
             if key == {}:
                 return fn(*args, **kwargs)
             
@@ -44,10 +46,13 @@ def cached():
         
             cachemap[hashkey] = cache_path + hashkey + '.pickle'
 
+            res['metadata'] = metadata 
+            res['metadata']['cache'] = cachemap[hashkey]
+
             # write to cache file
             with open(cachemap[hashkey], 'wb') as cachehandle:
                 print("saving result to cache '%s'" % cachemap[hashkey])
-                pickle.dump(res, cachehandle)
+                pickle.dump(res, cachehandle, protocol=pickle.HIGHEST_PROTOCOL)
 
             # update cache map
             with open(cachemap_path, 'wb') as cachehandle:

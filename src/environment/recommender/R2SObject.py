@@ -25,6 +25,9 @@ import scipy.sparse as spa
 
 sys.path.append('/source/R2S/src/environment/recommender/algorithms')
 
+sys.path.append('/source/R2S/src/util')
+
+from R2Sprofile import profileit
 
 log = logging.getLogger(__name__)
 
@@ -40,6 +43,7 @@ ml = R2S(dataset={'name':"MovieLens", 'path':"/source/R2S/data/R2SDatasets/movie
 class R2S:
     _VALID_KEYWORDS = {'dataset', 'data', 'algo', 'matrix',  'algodata', 'algoparam'}
 
+    @profileit
     def __init__(self, **kwargs):
         for keyword, value in kwargs.items():
             if keyword in self._VALID_KEYWORDS:
@@ -52,7 +56,7 @@ class R2S:
         
 
 
-        #load all dataset
+        #load all dataset files
         for k in self.data:
             fn = str(self.dataset.path) + '/' + k + '.parquet'
             self.data[k] = pq.read_table(source=fn).to_pandas()
@@ -72,7 +76,7 @@ class R2S:
         self.ui_coo = spa.coo_matrix((_data, (_row, _col)))
 
 
-        #load algorithms available for that dataset
+        #load algorithms available for the current dataset
         for k in self.algo:
             print ('Loading the algorithm {} from the module {}'.format(k,self.algo[k]))
             self.algo[k] = getattr(importlib.import_module(self.algo[k],k),k)(self.__dict__)

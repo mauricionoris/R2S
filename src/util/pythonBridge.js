@@ -6,9 +6,10 @@ const logOutput = (name) => (data) => console.log(`[${name}] ${data}`)
 
 let runlocal = function(cmd, args) {
 
+
     return new Promise((resolve, reject) => {
             const process = spawn(cmd, args);
-    
+            //console.log(cmd, args)
             const out = []
             process.stdout.on('data', (data) => { out.push(data.toString()); } );
         
@@ -23,9 +24,14 @@ let runlocal = function(cmd, args) {
 
                 let formatedOutput = {};
                 process.exitCode = code;
-        
+                
                 if (code === 0) {
-                    formatedOutput = JSON.parse(out)
+                    try {
+                        formatedOutput = JSON.parse(out)
+                    } catch (e) {
+                        //console.log(e)
+                        formatedOutput = JSON.parse(out.slice(0,-1))
+                    }
                 }
                 resolve(Object.assign({},formatedOutput, {'exitCode':code}))
             });
@@ -40,7 +46,7 @@ let runRemote = function(host, args) {
 module.exports = {
 
     run: function(args) {return runlocal('python',args)},
-    runRemote: function(host,args,id) {return runRemote(host,args,id)},
+    runRemote: function(host,args,id) {return runRemote(host,args,id)}
 
 }
 
