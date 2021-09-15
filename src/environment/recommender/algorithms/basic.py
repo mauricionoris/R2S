@@ -24,15 +24,15 @@ from cache import cached
 from R2Sprofile import profileit
 
 
+
+
 class PopScore():
     
     def __init__(self, parent):
 
-
-        #get_class_from_frame(inspect.stack()[1][0])
-        #self.scores = ratings['item'].value_counts()
-        self.scores = None 
-        self.score_method = None 
+        algodata = parent.algodata[repr(self)]
+        self.ui_coo = parent.ui_coo
+        self.scores = parent.__dict__['data'][algodata['scores']['dataset']][algodata['scores']['feature']].value_counts() 
 
     def fit_by_quantile(self):
         print('by quantile')
@@ -49,59 +49,112 @@ class PopScore():
         print('by count')
         return self.scores.sort_index()
 
-    def fit(self):
+    @cached()
+    def fit(self, users, n, score_method):
 
-        if self.score_method == 'quantile':
-            return self.fit_by_quantile()
-        if self.score_method == 'rank':
-            return self.fit_by_rank()
-        if self.score_method == 'count':
-            return self.fit_by_count()
+        items = None
+        rec = {}
+        if score_method == 'quantile':
+            items = self.fit_by_quantile()
+        if score_method == 'rank':
+            items = self.fit_by_rank()
+        if score_method == 'count':
+            items = self.fit_by_count()
+
+        poplist = items.sort_values(ascending=False).index[:n].to_numpy()
+        for u in users:
+            rec[str(u)] = poplist
+        return rec
+
+
+
         
+    #@profileit
+    def recommend(self, parameters):
+
+        self._setrecommendationparameters(parameters)
+
+        if self.users is None:
+            self.users = np.unique(self.ui_coo.row)
+        else:
+            if len(self.users) == 0:
+                self.users = np.unique(self.ui_coo.row)
+
+        self.rec = self.fit(self.users, self.n, self.score_method)
+        return self.rec
+
+    
+    def __str__(self):
+        return 'PopScore - A popularity algorithm'
+
+    def __repr__(self):
+        return 'PopScore'
+
+
+    #TODO: MAKE IT GENERIC FOR ALL MODULES
+    def _setrecommendationparameters(self, parameters):
+
+        self._VALID_KEYWORDS = {'users', 'n', 'score_method'}
+        for keyword, value in parameters._get_kwargs():
+            if keyword in self._VALID_KEYWORDS:
+                setattr(self, keyword, value)
+            
+
+
+
 
 class Random():
 
-    #recfile = '/source/R2S/cache/random.rec.pickle'
     def __init__(self, parent):
         
-        self.ui_coo = parent['ui_coo']
-        self.items = None
-        self.rec = None
 
+        algodata = parent.algodata[repr(self)]
+        self.ui_coo = parent.ui_coo
+        self.items = parent.__dict__['data'][algodata['items']['dataset']][algodata['items']['feature']].to_numpy()
+        self.rec = None
+        
 
     @cached()
-    def fit(self, user, n, use_cache=False, metadata={}):
+    def fit(self, users, n):
         
         self.lil = self.ui_coo.tolil()
         rng = np.random.default_rng(1)
         rec = {}
-        for i ,rated in zip(user, self.lil.rows[tuple([user])]):
+        for i ,rated in zip(users, self.lil.rows[tuple([users])]):
             candidates = np.setdiff1d(self.items, rated, True)
             rec[str(i)] = rng.choice(candidates, n, False)   
 
         return rec
 
-    @profileit
-    def recommend(self, user=None, n=10, use_cache=False):
-        
+    #@profileit
+    def recommend(self, parameters):
 
-        now = datetime.now()
+        self._setrecommendationparameters(parameters)
 
-        timestamp = datetime.timestamp(now)
-        mymetadata = {'recommended_at':timestamp, 'by': 'me'}
-        mymetadata = {}
-        if user is None:
-            user = np.unique(self.ui_coo.row)
+
+        if self.users is None:
+            self.users = np.unique(self.ui_coo.row)
         else:
-            if len(user) == 0:
-                user = np.unique(self.ui_coo.row)
+            if len(self.users) == 0:
+                self.users = np.unique(self.ui_coo.row)
 
-        self.rec = self.fit(user, n, use_cache, mymetadata)
+        self.rec = self.fit(self.users, self.n)
 
         return self.rec
 
+    #TODO: MAKE IT GENERIC FOR ALL MODULES
+    def _setrecommendationparameters(self, parameters):
+
+        self._VALID_KEYWORDS = {'users', 'n'}
+        for keyword, value in parameters._get_kwargs():
+            if keyword in self._VALID_KEYWORDS:
+                setattr(self, keyword, value)
+            
 
     def __str__(self):
+        return 'Random - A random algorithm'
+
+    def __repr__(self):
         return 'Random'
 
 

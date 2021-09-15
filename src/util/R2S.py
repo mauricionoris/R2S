@@ -2,7 +2,8 @@ import argparse, sys, os
 import json
 import logging
 
-     
+sys.path.append('/source/R2S/src/util')
+sys.path.append('/source/R2S/src/agent')
 sys.path.append('/source/R2S/src/environment/setup')
 sys.path.append('/source/R2S/src/environment/recommender')
 
@@ -50,7 +51,7 @@ def R2Sselector(func, args):
         return {'imported_files': import_dataset(args)}
     
     if func == 'recommend':
-        from agent import callR2S
+        from agent_interaction import callR2S
         return {'metadata': callR2S(args)}
 
 

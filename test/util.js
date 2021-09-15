@@ -30,7 +30,7 @@ let _Options2 = {
   "log": ""
 }
 
-let _args = ['/source/R2S/test/python/IntegrationTests.py']
+let _args = ['/source/R2S/src/util/R2S.py']
   
 
 function _DictToParams(opt) {

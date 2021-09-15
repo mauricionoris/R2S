@@ -40,21 +40,25 @@ ml = R2S(dataset={'name':"MovieLens", 'path':"/source/R2S/data/R2SDatasets/movie
          algo={'PopScore': 'basic'} #key = algo / #value=module
 """
 
-class R2S:
+class R2S():
     _VALID_KEYWORDS = {'dataset', 'data', 'algo', 'matrix',  'algodata', 'algoparam'}
 
-    @profileit
-    def __init__(self, **kwargs):
-        for keyword, value in kwargs.items():
+    #@profileit
+
+    def __init__(self, r2senv):
+
+        #print(env._get_kwargs())
+
+        for keyword, value in r2senv._get_kwargs():
             if keyword in self._VALID_KEYWORDS:
                 setattr(self, keyword, value)
             else:
                 raise ValueError(
                     "Unknown keyword argument: {!r}".format(keyword))
         
+         
         self.dataset = Namespace(**self.dataset)
-        
-
+        #self.algodata = Namespace(**self.algodata)
 
         #load all dataset files
         for k in self.data:
@@ -63,7 +67,6 @@ class R2S:
             print('Loading data file {} with {} rows and  {} columns'.format(k, self.data[k].shape[0],self.data[k].shape[1]))
 
         #self.data = Namespace(**self.data)
-
 
         self.matrix = Namespace(**self.matrix)
         #data pre-process
@@ -75,36 +78,17 @@ class R2S:
 
         self.ui_coo = spa.coo_matrix((_data, (_row, _col)))
 
-
         #load algorithms available for the current dataset
         for k in self.algo:
             print ('Loading the algorithm {} from the module {}'.format(k,self.algo[k]))
-            self.algo[k] = getattr(importlib.import_module(self.algo[k],k),k)(self.__dict__)
+            self.algo[k] = getattr(importlib.import_module(self.algo[k],k),k)(self)
            
-        self.algo = Namespace(**self.algo)
-
-
-
-    def __del__(self):
-        print('----------------------------R2S Object end of scope -------------------------------------')
-        print('----------------------------Thanks for using R2S ----------------------------------------')
-
+        #self.algo = Namespace(**self.algo)
+        
        
 
-        # Store data (serialize)
-###        with open('/source/R2S/cache/random.rec.pickle', 'wb') as handle:
-###            pickle.dump(self.algo.Random.rec, handle, protocol=pickle.HIGHEST_PROTOCOL)
-
-
-#        with open('/source/R2S/cache/user.candidates.pickle', 'wb') as handle:
-#            pickle.dump(self.algo.Random.candidates, handle, protocol=pickle.HIGHEST_PROTOCOL)
-
-        #TODO: Candidates generates a huge cache (PROBLEM) ...but it can be used in different algos
-
-        print('----------------------------Cache files updated -----------------------------------------')
-
-        
-        #TODO: SAVING THE RECOMMENDATIONS AND CANDIDATES AS CACHE TO IMPROVE THE ALGORITHMS
+    def __del__(self):
+        print('---------------------Thanks for using R2S - R2S Environment Object end of scope -------------------------------------')
 
 #    @cached_property
 #    def metadata():

@@ -23,7 +23,7 @@ describe('Log tests', function() {
         let logRead = await logHandler.readbyr2sPid(Options.logfile,Options.r2sPid)
         assert.deepStrictEqual([logmessage], logRead)
       })
-      this.timeout(20000)
+      this.timeout(40000)
       it('should be able to monitor the log of a specific r2sPid -- Remotelly', async () => {
         Options.r2sPid = uuidV4()
         Options.log = logmessage
