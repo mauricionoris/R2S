@@ -1,6 +1,8 @@
 import argparse, sys, os
 import json
 import logging
+from collections import namedtuple
+from argparse import Namespace
 
 sys.path.append('/source/R2S/src/util')
 sys.path.append('/source/R2S/src/agent')
@@ -20,8 +22,31 @@ parser.add_argument('--logfile'      , '-lf'  , help="Path to the log file")
 
 ret = json.loads('{"r2sPid": 0, "return": 1000, "exitCode": 100}')
 
+
+
+class R2SNamespace(Namespace):
+
+  @staticmethod
+  def map_entry(entry):
+    if isinstance(entry, dict):
+      return R2SNamespace(**entry)
+
+    return entry
+
+  def __init__(self, **kwargs):
+    super().__init__(**kwargs)
+    for key, val in kwargs.items():
+      if type(val) == dict:
+      #  setattr(self, key, R2SNamespace(**val))
+        setattr(self, key, Namespace(**val))
+      elif type(val) == list:
+        setattr(self, key, list(map(self.map_entry, val)))
+
+
+
 def ParseParameters():
-    return parser.parse_args()
+    return args
+
 
 
 def R2Sselector(func, args):
@@ -52,16 +77,39 @@ def R2Sselector(func, args):
     
     if func == 'recommend':
         from agent_interaction import callR2S
-        return {'metadata': callR2S(args)}
+
+        return {'metadata': callR2S(args.environment, args.action, args.parameters)}
 
 
 def R2SProxyModule(args):
+   
     return json.dumps(ProxyModule(args))
 
 
 def ProxyModule(args):
 
     if args.function != "":
+        
+        obj_params = {}
+
+        for arg in vars(args):
+            if arg.endswith('_obj'):
+                v  = getattr(args,arg).replace('&',',')
+                obj_params[arg.removesuffix('_obj')] = json.loads(v)
+            else: 
+                obj_params[arg] = getattr(args,arg)
+        
+        args = R2SNamespace(**obj_params)
+
+
+#        for (p,v) in obj_params:
+#            setattr(args, p, v)
+            
+
+       
+        
+
+
         ret.update(R2Sselector(args.function, args))
   
 

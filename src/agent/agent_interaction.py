@@ -6,9 +6,10 @@ sys.path.append('/source/R2S/src/environment/recommender')
 
 #from R2Sprofile import profileit
 import R2SObject
-import pandas as pd
+#import pandas as pd
 import numpy as np
 import argparse 
+from argparse import Namespace
 
 
 parser=argparse.ArgumentParser()
@@ -18,33 +19,43 @@ import time
 
 
 #@profileit
-def callR2S(env_setup, parameters, action=0):
+def callR2S(env, action, parameters):
 
-    print(env.__dict__)
-    print(param.__dict__)
+    #print('Environment:', env)
+    #print('Action:', action)
+    #print('parameters:', parameters)
+    
+
     #Setting the Environment
-    MyEnvironment = R2SObject.R2S(env_setup)
+    R2SEnv = R2SObject.R2S(env)
 
     #Executing an action
+    ts = time.time()
+    ret = R2SEnv.algo[action.algo].recommend(parameters)
+    te = time.time()
 
+    for i in parameters.users:
+        print('User {} --> Recommendations {}'.format(i,ret[str(i)]))
+
+    print ('Time elapsed {} to run {} algorithm '.format(te-ts, action.algo) )
+    
+    """"
+    print(ret['metadata'])
+
+    #JUST FOR TESTING PURPOSES. It will execute an algorithm setted at the action parameter
     print('available algorithms')
-        
 
-    #ret = R2S.algo.Random.recommend(users=param.users, n= param.n)
-    for available_algorithm in MyEnvironment.algo:
-        
+    for available_algorithm in R2SEnv.algo:
         ts = time.time()
-        ret = MyEnvironment.algo[available_algorithm].recommend(parameters)
+        ret = R2SEnv.algo[available_algorithm].recommend(parameters)
         te = time.time()
-
-        for i in parameters.users:
+       for i in parameters.users:
             print('User {} --> Recommendations {}'.format(i,ret[str(i)]))
-
-        print ('Time elapsed {} to run ({}) with the folling parameters {}'.format(te-ts, available_algorithm, parameters) )
+        print ('Time elapsed {} to run {} algorithm '.format(te-ts, available_algorithm) )
         print(ret['metadata'])
+    """
+    return ret['metadata']
 
-
-    return 0
 
 if __name__ == '__main__':
 
@@ -58,12 +69,12 @@ if __name__ == '__main__':
                     , algodata={'Random':{'items':{'dataset':'movies', 'feature':'movieId'}}
                                ,'PopScore':{'scores':{'dataset':'ratings','feature':'movieId'}}})
 
-    param = argparse.Namespace(users = [25,26,27,28,29,30], n = 10, score_method = 'count')
+    param = argparse.Namespace(users = [25,26,27,28,29,30,31,32], n = 3, score_method = 'count')
 
 
-    action = argparse.Namespace(t0 = {'algo':'Random'})
+    actions = argparse.Namespace(algo = 'Random')
 
     #print(args)
-    print(callR2S(env, param, action))
+    print(callR2S(env, actions, param))
     sys.exit(0) #exit code of the script
 

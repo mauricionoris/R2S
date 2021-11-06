@@ -32,14 +32,30 @@ let _Options2 = {
 
 let _args = ['/source/R2S/src/util/R2S.py']
   
+isObject = function(a) {
+  return (!!a) && (a.constructor === Object);
+}
 
-function _DictToParams(opt) {
+isArray = function(a) {
+  return (!!a) && (a.constructor === Array);
+};
+
+function _DictToParams(opt, keyflag="--") {
 
     let params = [];
 
-    for (const [k,v] of Object.entries(opt)) {
-       params.push("--" + k + "=" + v + "") 
 
+    for (let [k,v] of Object.entries(opt)) {
+      
+      if (isObject(v)) {
+         k = k + '_obj'
+         v = JSON.stringify(v).replace(/,/g, '&');
+        
+      }
+
+      params.push(keyflag + k + "=" + v + "") 
+   
+ 
     } 
 
     return params;
