@@ -111,7 +111,7 @@ describe('Structural tests', function() {
 
     describe('Arrow Library Tests', function(){
       describe('Calling an Arrow Script', function() {
-        this.timeout(40000)
+        this.timeout(60000)
         it('should be able to use Arrow on R2SData', async () => {
           Options.function = "ArrowTesting"  
           Options.ret = ""

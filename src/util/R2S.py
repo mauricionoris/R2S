@@ -22,8 +22,6 @@ parser.add_argument('--logfile'      , '-lf'  , help="Path to the log file")
 
 ret = json.loads('{"r2sPid": 0, "return": 1000, "exitCode": 100}')
 
-
-
 class R2SNamespace(Namespace):
 
   @staticmethod
@@ -37,7 +35,6 @@ class R2SNamespace(Namespace):
     super().__init__(**kwargs)
     for key, val in kwargs.items():
       if type(val) == dict:
-      #  setattr(self, key, R2SNamespace(**val))
         setattr(self, key, Namespace(**val))
       elif type(val) == list:
         setattr(self, key, list(map(self.map_entry, val)))

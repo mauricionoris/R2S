@@ -27,9 +27,72 @@ from lenskit.data import sparse_ratings
 from lenskit.sharing import in_share_context
 from lenskit.util.parallel import is_mp_worker
 from lenskit.util.accum import kvp_minheap_insert, kvp_minheap_sort
-from . import Predictor
+#from . import Predictor
 
 _logger = logging.getLogger(__name__)
+
+import sys
+
+sys.path.append('/source/R2S/src/util')
+
+from cache import cached
+from R2Sprofile import profileit
+
+
+
+class R2SWrapper_ItemItem():
+
+    
+    def __init__(self, parent):
+
+        
+        algodata = parent.algodata[repr(self)]
+        self.ui_coo = parent.ui_coo
+        self.ratings = parent.__dict__['data']['ratings'][['userId','movieId','rating']].head(100000)
+        self.ratings.columns =['user','item','rating']
+    
+    @cached()
+    def fit(self, users, n):
+        
+        trained_data = self.ItemItem.fit(self.ratings)
+        self.ItemItem = trained_data['self']
+
+        rec = {}
+        rec['metadata'] = trained_data['metadata']
+
+        for u  in users:
+
+            prediction = self.ItemItem.predict_for_user(u,self.ui_coo.col) 
+            rec[str(u)] = prediction.nlargest(n)  
+
+        return rec
+
+    #@profileit
+    
+    def recommend(self, parameters):
+
+
+        self._setrecommendationparameters(parameters)
+        self.ItemItem = ItemItem(self.nnbrs)
+        self.rec = self.fit(self.users, self.n)
+        return self.rec
+
+
+    #TODO: MAKE IT GENERIC FOR ALL MODULES
+    def _setrecommendationparameters(self, parameters):
+
+        self._VALID_KEYWORDS = {'users', 'n', 'nnbrs'}
+        for keyword, value in parameters._get_kwargs():
+            if keyword in self._VALID_KEYWORDS:
+                setattr(self, keyword, value)
+            
+
+    def __str__(self):
+        return 'ItemItem - Knn algo for itemitem'
+
+    def __repr__(self):
+        return 'R2SWrapper_ItemItem'
+
 
 
 def _make_blocks(n, size):
@@ -209,6 +272,8 @@ _predictors = {
 
 
 class ItemItem():
+
+
     """
     Item-item nearest-neighbor collaborative filtering with ratings. This item-item implementation
     is not terribly configurable; it hard-codes design decisions found to work well in the previous
@@ -246,14 +311,6 @@ class ItemItem():
     AGG_WA = intern('weighted-average')
     RATING_AGGS = [AGG_WA]  # the aggregates that use rating values
 
-    #TODO: MAKE IT GENERIC FOR ALL MODULES
-    def _setrecommendationparameters(self, parameters):
-
-        self._VALID_KEYWORDS = {'users', 'min_nbrs', 'min_sim','center','aggregate'}
-        for keyword, value in parameters._get_kwargs():
-            if keyword in self._VALID_KEYWORDS:
-                setattr(self, keyword, value)
-
     def __init__(self, nnbrs, min_nbrs=1, min_sim=1.0e-6, save_nbrs=None,center=True, aggregate='weighted-average'):
         self.nnbrs = nnbrs
         if self.nnbrs is not None and self.nnbrs < 1:
@@ -266,6 +323,7 @@ class ItemItem():
         self.center = center
         self.aggregate = aggregate
 
+    @cached()
     def fit(self, ratings, **kwargs):
         """
         Train a model.
@@ -316,7 +374,7 @@ class ItemItem():
         _logger.info('[%s] transposed matrix for optimization', self._timer)
         _logger.debug('[%s] done, memory use %s', self._timer, util.max_memory())
 
-        return self
+        return {'self':self}
 
     def _mean_center(self, ratings, rmat, items):
         if not self.center:

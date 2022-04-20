@@ -27,7 +27,6 @@ def cached():
             
             key, metadata = _get_args_dict(fn, args, kwargs)   
 
-            print(key)        
             if key == {}:
                 return fn(*args, **kwargs)
             
@@ -36,7 +35,7 @@ def cached():
             if os.path.exists(cachemap_path):
                 with open(cachemap_path, 'rb') as cachehandle:
                     cachemap =  pickle.load(cachehandle)
-   
+                
                 if hashkey in cachemap:
                     if os.path.exists(cachemap[hashkey]):
                             with open(cachemap[hashkey], 'rb') as cachehandle:
@@ -51,17 +50,30 @@ def cached():
             res['metadata'] = metadata 
             res['metadata']['cache'] = cachemap[hashkey]
 
+            ## update cache map
+            update_cachemap(cachemap_path,hashkey,cachemap[hashkey])
+
             # write to cache file
             with open(cachemap[hashkey], 'wb') as cachehandle:
                 print("saving result to cache '%s'" % cachemap[hashkey])
                 pickle.dump(res, cachehandle, protocol=pickle.HIGHEST_PROTOCOL)
 
-            # update cache map
-            with open(cachemap_path, 'wb') as cachehandle:
-                pickle.dump(cachemap, cachehandle, protocol=pickle.HIGHEST_PROTOCOL)
 
             return res
 
         return wrapped
 
     return decorator   # return this "customized" decorator that uses "cachefile"
+
+
+def update_cachemap(p,k,v):
+
+    cachemap = {}
+    if os.path.exists(cachemap_path):
+        with open(p, 'rb') as cachehandle:
+            cachemap = pickle.load(cachehandle)
+
+    cachemap[k] = v
+
+    with open(p, 'wb') as cachehandle:
+        pickle.dump(cachemap, cachehandle, protocol=pickle.HIGHEST_PROTOCOL)

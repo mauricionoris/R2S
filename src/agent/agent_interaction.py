@@ -59,22 +59,28 @@ def callR2S(env, action, parameters):
 
 if __name__ == '__main__':
 
-    env = argparse.Namespace(dataset={'name':'MovieLens', 'path':'/source/R2S/data/R2SDatasets/movielens'}
-#                   , data={'ratings':None, 'movies': None, 'tags': None, 'links': None, 'genome-tags':None, 'genome-scores': None}
-                    , data={'ratings':None, 'movies': None} #TODO: specify the columns to load to avoid loading the whole file
-                    , matrix={'source':'ratings', 'row':'userId', 'col':'movieId', 'data':'rating'}
-                    , algo={ 'Random':'basic','PopScore': 'basic'}
 #                   , algo={'PopScore': 'basic'}
 #                   , algo={'Random':'basic'}
-                    , algodata={'Random':{'items':{'dataset':'movies', 'feature':'movieId'}}
-                               ,'PopScore':{'scores':{'dataset':'ratings','feature':'movieId'}}})
-
-    param = argparse.Namespace(users = [25,26,27,28,29,30,31,32], n = 3, score_method = 'count')
+#                   , data={'ratings':None, 'movies': None, 'tags': None, 'links': None, 'genome-tags':None, 'genome-scores': None}
 
 
-    actions = argparse.Namespace(algo = 'Random')
+    env = argparse.Namespace(dataset={'name':'MovieLens', 'path':'/source/R2S/data/R2SDatasets/movielens'}
+                    , data={'ratings':None, 'movies': None} #TODO: specify the columns to load to avoid loading the whole file
+                    , matrix={'source':'ratings', 'row':'userId', 'col':'movieId', 'data':'rating'} #format to allow algo computations (on env load ?!?)
+                    , algo={ 'Random':'basic','PopScore': 'basic', 'R2SWrapper_ItemItem':'collaborative'} #list of avalilable algos ---- each env. does not need to have all algos .... 
 
+                    , algodata={'Random':{'items':{'dataset':'movies', 'feature':'movieId'}}  # especific to each algo .... 
+                               ,'PopScore':{'scores':{'dataset':'ratings','feature':'movieId'}}
+                               ,'R2SWrapper_ItemItem':{'ratings':['userId']}
+
+                               })
+                               
+
+    action = argparse.Namespace(algo = 'R2SWrapper_ItemItem')
+    #param = argparse.Namespace(users = [25,26,27], n = 3, score_method = 'count')
+    param = argparse.Namespace(users = [2], n = 3, nnbrs = 5, save_nbrs=10)
+    
     #print(args)
-    print(callR2S(env, actions, param))
+    print(callR2S(env, action, param))
     sys.exit(0) #exit code of the script
 
