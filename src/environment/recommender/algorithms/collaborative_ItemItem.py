@@ -48,7 +48,7 @@ class R2SWrapper_ItemItem():
         
         algodata = parent.algodata[repr(self)]
         self.ui_coo = parent.ui_coo
-        self.ratings = parent.__dict__['data']['ratings'][['userId','movieId','rating']].head(100000)
+        self.ratings = parent.__dict__['data']['ratings'][['userId','movieId','rating']]
         self.ratings.columns =['user','item','rating']
     
     @cached()
@@ -63,7 +63,7 @@ class R2SWrapper_ItemItem():
         for u  in users:
 
             prediction = self.ItemItem.predict_for_user(u,self.ui_coo.col) 
-            rec[str(u)] = prediction.nlargest(n)  
+            rec[str(u)] = prediction.nlargest(n).index.tolist() 
 
         return rec
 

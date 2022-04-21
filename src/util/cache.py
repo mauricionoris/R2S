@@ -31,16 +31,13 @@ def cached():
                 return fn(*args, **kwargs)
             
             hashkey = hashlib.sha1(str(key).encode("utf-8")).hexdigest()
-            cachemap = {}
-            if os.path.exists(cachemap_path):
-                with open(cachemap_path, 'rb') as cachehandle:
-                    cachemap =  pickle.load(cachehandle)
-                
-                if hashkey in cachemap:
-                    if os.path.exists(cachemap[hashkey]):
-                            with open(cachemap[hashkey], 'rb') as cachehandle:
-                                print("using cached result from '%s'" % cachemap[hashkey])
-                                return pickle.load(cachehandle)
+            cachemap = open_cachemap(cachemap_path)
+            
+            if hashkey in cachemap:
+                if os.path.exists(cachemap[hashkey]):
+                        with open(cachemap[hashkey], 'rb') as cachehandle:
+                            print("using cached result from '%s'" % cachemap[hashkey])
+                            return pickle.load(cachehandle)
 
             # execute the function with all arguments passed
             res = fn(*args, **kwargs)
@@ -65,15 +62,19 @@ def cached():
 
     return decorator   # return this "customized" decorator that uses "cachefile"
 
+def open_cachemap(p):
+    cachemap = {}
+    if os.path.exists(p):
+        with open(p, 'rb') as cachehandle:
+            cachemap = pickle.load(cachehandle)
+    
+    return cachemap
 
 def update_cachemap(p,k,v):
 
-    cachemap = {}
-    if os.path.exists(cachemap_path):
-        with open(p, 'rb') as cachehandle:
-            cachemap = pickle.load(cachehandle)
-
+    cachemap = open_cachemap(p)
     cachemap[k] = v
-
     with open(p, 'wb') as cachehandle:
         pickle.dump(cachemap, cachehandle, protocol=pickle.HIGHEST_PROTOCOL)
+
+
